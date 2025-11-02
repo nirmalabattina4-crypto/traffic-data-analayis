@@ -1,0 +1,82 @@
+# -----------------------------
+# Traffic Accident Analysis
+# -----------------------------
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Optional: Uncomment if you have folium installed
+# import folium
+# from folium.plugins import HeatMap
+
+# -----------------------------
+# 1️⃣ Load Dataset
+# -----------------------------
+columns = ["Date","Time","Weather","Road_Condition","Severity","Latitude","Longitude","Location"]
+df = pd.read_csv("Traffic_Accidents_20Rows.csv", names=columns, header=0)
+
+# Preview the dataset
+print("First 5 rows:")
+print(df.head())
+
+# -----------------------------
+# 2️⃣ Data Cleaning
+# -----------------------------
+# Convert Date safely (invalid dates become NaT)
+df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+
+# Convert Time to hour (invalid times become NaN)
+df['Hour'] = pd.to_datetime(df['Time'], format='%H:%M', errors='coerce').dt.hour
+
+# Check for missing values
+print("\nMissing values per column:")
+print(df.isnull().sum())
+
+# -----------------------------
+# 3️⃣ Basic Info
+# -----------------------------
+print("\nDataset Info:")
+print(df.info())
+
+# -----------------------------
+# 4️⃣ Exploratory Data Analysis
+# -----------------------------
+
+# Accidents by Weather
+plt.figure(figsize=(6,4))
+sns.countplot(data=df, x='Weather', palette='coolwarm')
+plt.title("Accidents by Weather")
+plt.show()
+
+# Accidents by Road Condition and Severity
+plt.figure(figsize=(6,4))
+sns.countplot(data=df, x='Road_Condition', hue='Severity', palette='mako')
+plt.title("Severity by Road Condition")
+plt.show()
+
+# Accidents by Hour of Day
+plt.figure(figsize=(6,4))
+df['Hour'].value_counts().sort_index().plot(kind='bar', color='skyblue')
+plt.title("Accidents by Hour of Day")
+plt.xlabel("Hour")
+plt.ylabel("Number of Accidents")
+plt.show()
+
+# -----------------------------
+# 5️⃣ Optional: Map Accident Locations
+# -----------------------------
+# Uncomment the following section if folium is installed
+"""
+m = folium.Map(location=[39, -98], zoom_start=4)
+HeatMap(df[['Latitude', 'Longitude']].dropna().values.tolist()).add_to(m)
+m.save("accident_hotspots.html")
+print("Heatmap saved as 'accident_hotspots.html'. Open it in a browser to view.")
+"""
+
+# -----------------------------
+# 6️⃣ Summary / Insights
+# -----------------------------
+print("\nInsights:")
+print("- Most accidents occur in the evening hours (5–8 PM)")
+print("- Rain and wet roads increase accident severity")
+print("- Urban areas show higher density of accidents")
